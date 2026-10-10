@@ -1,0 +1,540 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VCCS Clerk Management System</title>
+
+<style>
+:root {
+  --bg: #0b1020;
+  --sidebar: #10172a;
+  --panel: #141d32;
+  --border: #293650;
+  --text: #edf2ff;
+  --muted: #91a0ba;
+  --accent: #8b7cff;
+  --green: #4adea3;
+  --red: #ff7e8b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 255px;
+  background: var(--sidebar);
+  padding: 25px 17px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar h2 { color: #b7aaff; font-size: 30px; margin: 0 0 10px; }
+.college { color: var(--muted); font-size: 12px; line-height: 1.7; }
+nav { display: grid; gap: 8px; margin-top: 25px; }
+.nav {
+  padding: 13px;
+  color: #bac6dc;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  text-align: left;
+}
+.nav:hover, .nav.active { background: #292849; color: white; }
+.nav.active { box-shadow: inset 3px 0 var(--accent); }
+.sidebar small { display: block; margin-top: 35px; color: var(--muted); }
+main { flex: 1; min-width: 0; padding: 28px; }
+.topbar, .section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 24px;
+}
+.topbar h1 { font-size: 27px; margin: 8px 0; }
+.muted, .section-heading p { color: var(--muted); font-size: 12px; }
+.welcome {
+  padding: 28px;
+  border: 1px solid #413b76;
+  border-radius: 15px;
+  background: linear-gradient(120deg, #252444, #191d38);
+  margin-bottom: 22px;
+  line-height: 1.7;
+}
+.welcome p { color: #b7aaff; font-size: 11px; letter-spacing: 1px; }
+.welcome h2 { font-size: 25px; margin: 10px 0; }
+.welcome span { color: #b9c2da; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 22px;
+}
+.card, .panel, .notice-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.card { padding: 20px; }
+.card p { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.card h2 { margin: 0; font-size: 29px; }
+.panel { padding: 20px; margin-bottom: 20px; }
+.panel h3 { margin-top: 0; }
+.table-wrap { overflow-x: auto; }
+.panel.table-wrap { padding: 0; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th {
+  background: #19243a;
+  color: #a7b5cd;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+th, td {
+  padding: 14px;
+  border-bottom: 1px solid #28344a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+tr:last-child td { border-bottom: 0; }
+tr:hover td { background: #19243a; }
+.primary, .secondary, .danger {
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 2px;
+}
+.primary { color: white; background: var(--accent); }
+.primary:hover { background: #7564f5; }
+.secondary { color: #d0daec; background: #26334b; border: 1px solid #394762; }
+.danger { color: #ffb1b9; background: #452732; }
+.section-heading h2 { margin: 0; font-size: 22px; }
+.section-heading p { margin-bottom: 0; }
+input, select, textarea {
+  color: var(--text);
+  background: #0e1628;
+  border: 1px solid #34415b;
+  border-radius: 8px;
+  padding: 11px;
+  width: 100%;
+  margin: 7px 0 15px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.toolbar input { width: auto; margin: 0; }
+.toolbar label { color: var(--muted); font-size: 12px; }
+.pill { padding: 5px 9px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+.pending { background: #473722; color: #ffd18d; }
+.approved, .present { background: #1e4038; color: #72e3b4; }
+.rejected, .absent { background: #472832; color: #ff9eaa; }
+.on-leave { background: #473722; color: #ffd18d; }
+.notice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+.notice-card { padding: 20px; overflow-wrap: anywhere; }
+.notice-card h3 { margin: 12px 0; }
+.notice-card p { font-size: 13px; line-height: 1.7; white-space: pre-wrap; color: #b9c5da; }
+.notice-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.notice-category { color: #c7bbff; background: #302953; padding: 5px 9px; border-radius: 20px; font-size: 10px; }
+.empty { color: var(--muted); text-align: center; padding: 25px; }
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+dialog {
+  width: min(470px, calc(100% - 25px));
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #394563;
+  border-radius: 14px;
+  padding: 25px;
+}
+dialog::backdrop { background: #030610cc; }
+dialog h2 { margin-top: 0; }
+dialog label { display: block; font-size: 12px; color: #c6d0e1; }
+.page { display: none; }
+.page.active { display: block; }
+#toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #213a35;
+  color: #a9f3d4;
+  border: 1px solid #326a5b;
+  border-radius: 9px;
+  padding: 13px 18px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+#toast.show { opacity: 1; }
+footer { color: #71819b; font-size: 11px; margin-top: 30px; }
+@media(max-width: 1000px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width: 700px) {
+  .layout { display: block; }
+  .sidebar { width: 100%; }
+  nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  main { padding: 15px; }
+  .notice-grid { grid-template-columns: 1fr; }
+  .topbar h1 { font-size: 22px; }
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h2>VCCS</h2>
+  <p class="college">Vivekanand College Of Civil Services, Hinganghat 1388</p>
+  <nav>
+    <button class="nav active" data-page="dashboard">Dashboard</button>
+    <button class="nav" data-page="staff">Staff Management</button>
+    <button class="nav" data-page="leave">Leave Management</button>
+    <button class="nav" data-page="attendance">Attendance Management</button>
+    <button class="nav" data-page="students">Student Records</button>
+    <button class="nav" data-page="notices">Notice Management</button>
+  </nav>
+  <small>Frontend Demo · HTML CSS JS</small>
+</aside>
+
+<main>
+<header class="topbar">
+  <div><p class="muted">VCCS / ADMINISTRATION</p><h1 id="page-title">Dashboard</h1></div>
+  <span id="today-date"></span>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="welcome">
+    <p>COLLEGE ADMINISTRATION</p>
+    <h2>Welcome to VCCS Management</h2>
+    <span>Manage staff, leave requests, attendance, students and notices.</span>
+  </div>
+  <div class="stats">
+    <div class="card"><p>Total Staff</p><h2 id="total-staff">0</h2></div>
+    <div class="card"><p>Pending Leaves</p><h2 id="pending-leaves">0</h2></div>
+    <div class="card"><p>Present Today</p><h2 id="present-today">0</h2></div>
+    <div class="card"><p>Total Students</p><h2 id="total-students">0</h2></div>
+  </div>
+  <div class="panel">
+    <h3>Staff Directory</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Designation</th><th>Department</th></tr></thead>
+      <tbody id="dashboard-staff"></tbody>
+    </table></div>
+  </div>
+  <div class="panel"><h3>Recent Notices</h3><div id="dashboard-notices"></div></div>
+</section>
+
+<section class="page" id="staff">
+  <div class="section-heading"><div><h2>Staff Management</h2><p>Manage staff details.</p></div><button class="primary" id="add-staff-btn">+ Add Staff</button></div>
+  <input id="staff-search" placeholder="Search staff">
+  <div class="panel table-wrap"><table>
+    <thead><tr><th>Name</th><th>Designation</th><th>Department</th><th>Email</th><th>Action</th></tr></thead>
+    <tbody id="staff-table"></tbody>
+  </table></div>
+</section>
+
+<section class="page" id="leave">
+  <div class="section-heading"><div><h2>Leave Management</h2><p>Manage staff leave requests.</p></div><button class="primary" id="add-leave-btn">+ New Leave</button></div>
+  <div class="stats">
+    <div class="card"><p>Total Requests</p><h2 id="leave-total">0</h2></div>
+    <div class="card"><p>Pending</p><h2 id="leave-pending">0</h2></div>
+    <div class="card"><p>Approved</p><h2 id="leave-approved">0</h2></div>
+    <div class="card"><p>Rejected</p><h2 id="leave-rejected">0</h2></div>
+  </div>
+  <div class="panel table-wrap"><table>
+    <thead><tr><th>Staff</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="leave-table"></tbody>
+  </table></div>
+</section>
+
+<section class="page" id="attendance">
+  <div class="section-heading"><div><h2>Attendance Management</h2><p>Mark daily staff attendance.</p></div></div>
+  <div class="toolbar"><label>Date:</label><input type="date" id="attendance-date"><button class="secondary" id="load-attendance">Load</button><button class="primary" id="save-attendance">Save Attendance</button></div>
+  <div class="panel table-wrap"><table>
+    <thead><tr><th>Name</th><th>Designation</th><th>Status</th></tr></thead>
+    <tbody id="attendance-table"></tbody>
+  </table></div>
+</section>
+
+<section class="page" id="students">
+  <div class="section-heading"><div><h2>Student Records</h2><p>Manage demo student records.</p></div><button class="primary" id="add-student-btn">+ Add Student</button></div>
+  <input id="student-search" placeholder="Search students">
+  <div class="panel table-wrap"><table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Year</th><th>Action</th></tr></thead>
+    <tbody id="student-table"></tbody>
+  </table></div>
+</section>
+
+<section class="page" id="notices">
+  <div class="section-heading"><div><h2>Notice Management</h2><p>Create and manage announcements.</p></div><button class="primary" id="add-notice-btn">+ Create Notice</button></div>
+  <div id="notice-list" class="notice-grid"></div>
+</section>
+
+<footer>© <span id="year"></span> VCCS Clerk Management System · Frontend Demo</footer>
+</main>
+</div>
+
+<dialog id="staff-modal"><form id="staff-form">
+  <h2>Add Staff Member</h2>
+  <label>Full Name<input name="name" required></label>
+  <label>Designation<input name="designation" required></label>
+  <label>Department<input name="department"></label>
+  <label>Email<input name="email" type="email"></label>
+  <div class="actions"><button type="button" class="secondary" data-close="staff-modal">Cancel</button><button class="primary">Save Staff</button></div>
+</form></dialog>
+
+<dialog id="leave-modal"><form id="leave-form">
+  <h2>New Leave Request</h2>
+  <label>Staff Member<select name="staffId" id="leave-staff" required></select></label>
+  <label>From Date<input type="date" name="from" required></label>
+  <label>To Date<input type="date" name="to" required></label>
+  <label>Reason<textarea name="reason" required></textarea></label>
+  <div class="actions"><button type="button" class="secondary" data-close="leave-modal">Cancel</button><button class="primary">Submit Request</button></div>
+</form></dialog>
+
+<dialog id="student-modal"><form id="student-form">
+  <h2>Add Student</h2>
+  <label>Student ID<input name="studentId" required></label>
+  <label>Full Name<input name="name" required></label>
+  <label>Course<input name="course" required></label>
+  <label>Year<input name="year" required></label>
+  <div class="actions"><button type="button" class="secondary" data-close="student-modal">Cancel</button><button class="primary">Save Student</button></div>
+</form></dialog>
+
+<dialog id="notice-modal"><form id="notice-form">
+  <h2>Create Notice</h2>
+  <label>Title<input name="title" required></label>
+  <label>Category<select name="category"><option>Academic</option><option>Examination</option><option>Administration</option><option>Event</option></select></label>
+  <label>Details<textarea name="details" required></textarea></label>
+  <div class="actions"><button type="button" class="secondary" data-close="notice-modal">Cancel</button><button class="primary">Publish Notice</button></div>
+</form></dialog>
+
+<div id="toast" role="status"></div>
+
+<script>
+const KEY = {
+  staff:"vccs_staff_v1", leaves:"vccs_leaves_v1",
+  students:"vccs_students_v1", notices:"vccs_notices_v1",
+  attendance:"vccs_attendance_v1"
+};
+
+const defaultStaff = [
+  {id:1,name:"Yogesh Wankhede",designation:"Principal",department:"Administration",email:""},
+  {id:2,name:"Samiksha Raut",designation:"CEO",department:"Administration",email:""},
+  {id:3,name:"Varsha Aajansare",designation:"Assistant Professor",department:"Academic",email:""},
+  {id:4,name:"Kishore Kadwe",designation:"Assistant Professor",department:"Academic",email:""},
+  {id:5,name:"Vaibhavi Mule",designation:"Senior Clerk",department:"Administration",email:""},
+  {id:6,name:"Komal Gedam",designation:"Librarian",department:"Library",email:""},
+  {id:7,name:"Shraddha Paurkar",designation:"Computer Operator",department:"",email:""},
+  {id:8,name:"Sahil Meshram",designation:"Office Boy",department:"Office Support",email:""}
+];
+
+function load(key,fallback){
+  try { const data=localStorage.getItem(key); return data===null?fallback:JSON.parse(data); }
+  catch { return fallback; }
+}
+function save(key,data){
+  try { localStorage.setItem(key,JSON.stringify(data)); }
+  catch { alert("Could not save data in this browser."); }
+}
+let staff=load(KEY.staff,defaultStaff);
+let leaves=load(KEY.leaves,[]);
+let students=load(KEY.students,[]);
+let notices=load(KEY.notices,[]);
+let attendance=load(KEY.attendance,{});
+const $=selector=>document.querySelector(selector);
+
+function safe(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function today(){
+  const d=new Date();
+  return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+function dateText(value){
+  if(!value)return "—";
+  const d=new Date(value+"T00:00:00");
+  return Number.isNaN(d.getTime())?"—":d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+}
+function toast(message){
+  $("#toast").textContent=message;
+  $("#toast").classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>$("#toast").classList.remove("show"),2500);
+}
+function modal(id){document.getElementById(id).showModal();}
+function closeModal(id){document.getElementById(id).close();}
+function empty(columns,message){return `<tr><td colspan="${columns}" class="empty">${safe(message)}</td></tr>`;}
+function pill(status){
+  const css={Pending:"pending",Approved:"approved",Rejected:"rejected",Present:"present",Absent:"absent","On Leave":"on-leave"};
+  return `<span class="pill ${css[status]||"pending"}">${safe(status)}</span>`;
+}
+
+// Navigation
+const titles={dashboard:"Dashboard",staff:"Staff Management",leave:"Leave Management",attendance:"Attendance Management",students:"Student Records",notices:"Notice Management"};
+function go(page){
+  if(!titles[page])return;
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
+  document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  $("#page-title").textContent=titles[page];
+  ({dashboard:renderDashboard,staff:renderStaff,leave:renderLeaves,attendance:renderAttendance,students:renderStudents,notices:renderNotices})[page]();
+}
+document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+
+// Dashboard
+function renderDashboard(){
+  const records=attendance[$("#attendance-date").value||today()]||{};
+  $("#total-staff").textContent=staff.length;
+  $("#pending-leaves").textContent=leaves.filter(x=>x.status==="Pending").length;
+  $("#present-today").textContent=staff.filter(x=>records[x.id]==="Present").length;
+  $("#total-students").textContent=students.length;
+  $("#dashboard-staff").innerHTML=staff.length?staff.map(x=>`<tr><td>${safe(x.name)}</td><td>${safe(x.designation)}</td><td>${safe(x.department||"—")}</td></tr>`).join(""):empty(3,"No staff records.");
+  const recent=[...notices].reverse().slice(0,3);
+  $("#dashboard-notices").innerHTML=recent.length?recent.map(x=>`<p><strong>${safe(x.title)}</strong><br><span class="muted">${safe(x.details.slice(0,120))}</span></p>`).join(""):`<p class="empty">No notices yet.</p>`;
+  renderLeaveCounts();
+}
+
+// Staff
+function renderStaff(){
+  const q=$("#staff-search").value.toLowerCase().trim();
+  const filtered=staff.filter(x=>[x.name,x.designation,x.department,x.email].some(v=>String(v||"").toLowerCase().includes(q)));
+  $("#staff-table").innerHTML=filtered.length?filtered.map(x=>`<tr><td>${safe(x.name)}<div class="muted">ID: ${safe(x.id)}</div></td><td>${safe(x.designation)}</td><td>${safe(x.department||"—")}</td><td>${safe(x.email||"—")}</td><td><button class="danger" data-delete-staff="${safe(x.id)}">Delete</button></td></tr>`).join(""):empty(5,"No staff found.");
+  renderLeaveOptions();
+}
+$("#staff-search").addEventListener("input",renderStaff);
+$("#add-staff-btn").addEventListener("click",()=>{$("#staff-form").reset();modal("staff-modal");});
+$("#staff-form").addEventListener("submit",e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget);
+  const name=String(f.get("name")).trim(),designation=String(f.get("designation")).trim();
+  if(!name||!designation)return toast("Enter name and designation.");
+  staff.push({id:Date.now(),name,designation,department:String(f.get("department")).trim(),email:String(f.get("email")).trim()});
+  save(KEY.staff,staff);e.currentTarget.reset();closeModal("staff-modal");
+  renderStaff();renderDashboard();renderAttendance();toast("Staff member added.");
+});
+$("#staff-table").addEventListener("click",e=>{
+  const b=e.target.closest("[data-delete-staff]");if(!b)return;
+  const person=staff.find(x=>x.id===Number(b.dataset.deleteStaff));
+  if(!person||!confirm("Delete "+person.name+"?"))return;
+  staff=staff.filter(x=>x.id!==person.id);save(KEY.staff,staff);
+  renderStaff();renderDashboard();renderAttendance();toast("Staff member deleted.");
+});
+
+// Leave
+function renderLeaveOptions(){
+  const select=$("#leave-staff"),old=select.value;
+  select.innerHTML=staff.length?staff.map(x=>`<option value="${safe(x.id)}">${safe(x.name)}</option>`).join(""):`<option value="">Add staff first</option>`;
+  if(staff.some(x=>String(x.id)===old))select.value=old;
+}
+function renderLeaveCounts(){
+  $("#leave-total").textContent=leaves.length;
+  $("#leave-pending").textContent=leaves.filter(x=>x.status==="Pending").length;
+  $("#leave-approved").textContent=leaves.filter(x=>x.status==="Approved").length;
+  $("#leave-rejected").textContent=leaves.filter(x=>x.status==="Rejected").length;
+}
+function renderLeaves(){
+  renderLeaveCounts();
+  $("#leave-table").innerHTML=leaves.length?[...leaves].reverse().map(x=>`<tr><td>${safe(x.staffName)}</td><td>${dateText(x.from)}</td><td>${dateText(x.to)}</td><td>${safe(x.reason)}</td><td>${pill(x.status)}</td><td>${x.status==="Pending"?`<button class="primary" data-leave="Approved" data-id="${x.id}">Approve</button><button class="danger" data-leave="Rejected" data-id="${x.id}">Reject</button>`:"—"}</td></tr>`).join(""):empty(6,"No leave requests yet.");
+  renderDashboard();
+}
+$("#add-leave-btn").addEventListener("click",()=>{
+  if(!staff.length)return toast("Add staff first.");
+  $("#leave-form").reset();renderLeaveOptions();modal("leave-modal");
+});
+$("#leave-form").addEventListener("submit",e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget);
+  const person=staff.find(x=>x.id===Number(f.get("staffId")));
+  const from=String(f.get("from")),to=String(f.get("to"));
+  if(!person||to<from)return toast("Check staff and leave dates.");
+  leaves.push({id:Date.now(),staffId:person.id,staffName:person.name,from,to,reason:String(f.get("reason")).trim(),status:"Pending"});
+  save(KEY.leaves,leaves);e.currentTarget.reset();closeModal("leave-modal");renderLeaves();toast("Leave request submitted.");
+});
+$("#leave-table").addEventListener("click",e=>{
+  const b=e.target.closest("[data-leave]");if(!b)return;
+  const item=leaves.find(x=>x.id===Number(b.dataset.id));
+  if(!item||item.status!=="Pending")return;
+  item.status=b.dataset.leave;save(KEY.leaves,leaves);renderLeaves();toast("Leave "+item.status.toLowerCase()+".");
+});
+
+// Attendance
+$("#attendance-date").value=today();
+function renderAttendance(){
+  const date=$("#attendance-date").value||today(),records=attendance[date]||{};
+  $("#attendance-table").innerHTML=staff.length?staff.map(x=>{
+    const value=records[x.id]||"Present";
+    return `<tr><td>${safe(x.name)}</td><td>${safe(x.designation)}</td><td><select data-attendance="${x.id}"><option ${value==="Present"?"selected":""}>Present</option><option ${value==="Absent"?"selected":""}>Absent</option><option ${value==="On Leave"?"selected":""}>On Leave</option></select></td></tr>`;
+  }).join(""):empty(3,"No staff records.");
+}
+$("#load-attendance").addEventListener("click",()=>{renderAttendance();toast("Attendance loaded.");});
+$("#attendance-date").addEventListener("change",renderAttendance);
+$("#save-attendance").addEventListener("click",()=>{
+  const date=$("#attendance-date").value;if(!date)return toast("Select a date.");
+  attendance[date]={};
+  document.querySelectorAll("[data-attendance]").forEach(s=>attendance[date][s.dataset.attendance]=s.value);
+  save(KEY.attendance,attendance);renderDashboard();toast("Attendance saved.");
+});
+
+// Students
+function renderStudents(){
+  const q=$("#student-search").value.toLowerCase().trim();
+  const filtered=students.filter(x=>[x.studentId,x.name,x.course,x.year].some(v=>String(v).toLowerCase().includes(q)));
+  $("#student-table").innerHTML=filtered.length?filtered.map(x=>`<tr><td>${safe(x.studentId)}</td><td>${safe(x.name)}</td><td>${safe(x.course)}</td><td>${safe(x.year)}</td><td><button class="danger" data-delete-student="${x.id}">Delete</button></td></tr>`).join(""):empty(5,"No student records found.");
+}
+$("#student-search").addEventListener("input",renderStudents);
+$("#add-student-btn").addEventListener("click",()=>{$("#student-form").reset();modal("student-modal");});
+$("#student-form").addEventListener("submit",e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget),id=String(f.get("studentId")).trim();
+  if(students.some(x=>x.studentId.toLowerCase()===id.toLowerCase()))return toast("Student ID already exists.");
+  students.push({id:Date.now(),studentId:id,name:String(f.get("name")).trim(),course:String(f.get("course")).trim(),year:String(f.get("year")).trim()});
+  save(KEY.students,students);e.currentTarget.reset();closeModal("student-modal");renderStudents();renderDashboard();toast("Student added.");
+});
+$("#student-table").addEventListener("click",e=>{
+  const b=e.target.closest("[data-delete-student]");if(!b)return;
+  const s=students.find(x=>x.id===Number(b.dataset.deleteStudent));
+  if(!s||!confirm("Delete "+s.name+"?"))return;
+  students=students.filter(x=>x.id!==s.id);save(KEY.students,students);renderStudents();renderDashboard();toast("Student deleted.");
+});
+
+// Notices
+function renderNotices(){
+  $("#notice-list").innerHTML=notices.length?[...notices].reverse().map(x=>`<article class="notice-card"><div class="notice-top"><span class="notice-category">${safe(x.category)}</span><button class="danger" data-delete-notice="${x.id}">Delete</button></div><h3>${safe(x.title)}</h3><p>${safe(x.details)}</p><small class="muted">Published: ${dateText(x.date)}</small></article>`).join(""):`<div class="panel empty">No notices published yet.</div>`;
+}
+$("#add-notice-btn").addEventListener("click",()=>{$("#notice-form").reset();modal("notice-modal");});
+$("#notice-form").addEventListener("submit",e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget);
+  notices.push({id:Date.now(),title:String(f.get("title")).trim(),category:String(f.get("category")),details:String(f.get("details")).trim(),date:today()});
+  save(KEY.notices,notices);e.currentTarget.reset();closeModal("notice-modal");renderNotices();renderDashboard();toast("Notice published.");
+});
+$("#notice-list").addEventListener("click",e=>{
+  const b=e.target.closest("[data-delete-notice]");if(!b)return;
+  const item=notices.find(x=>x.id===Number(b.dataset.deleteNotice));
+  if(!item||!confirm('Delete notice "'+item.title+'"?'))return;
+  notices=notices.filter(x=>x.id!==item.id);save(KEY.notices,notices);renderNotices();renderDashboard();toast("Notice deleted.");
+});
+
+// Start application
+$("#today-date").textContent=new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+$("#year").textContent=new Date().getFullYear();
+renderStaff();
+renderLeaves();
+renderAttendance();
+renderStudents();
+renderNotices();
+renderDashboard();
+</script>
+</body>
+</html>
+```
